@@ -10,6 +10,7 @@ import (
 	"io"
 	"io/fs"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -24,13 +25,19 @@ type config struct {
 	NoEmbed bool
 	// Path to the directory where to list and upload files
 	StoreDir string
+	// Listen address
+	ListenAddr string
+	// Listen port
+	Port string
 }
 
 // newConfig creates the default configuration struct
 func newConfig() config {
 	return config{
-		NoEmbed:  false,
-		StoreDir: "files",
+		NoEmbed:    false,
+		StoreDir:   "files",
+		ListenAddr: "localhost",
+		Port:       "1323",
 	}
 }
 
@@ -40,6 +47,7 @@ func parseCli(args []string) config {
 
 	flag.CommandLine = flag.NewFlagSet(args[0], flag.ExitOnError)
 
+	hostPort := flag.String("listen", net.JoinHostPort(c.ListenAddr, c.Port), "listen on this host:port")
 	noEmbed := flag.Bool("no-embed", c.NoEmbed, "serve template and static dir from cwd")
 	storeDir := flag.String("store", c.StoreDir, "destination dir of uploads")
 	showVersion := flag.Bool("version", false, "show version")
@@ -59,6 +67,18 @@ func parseCli(args []string) config {
 
 	c.NoEmbed = *noEmbed
 	c.StoreDir = *storeDir
+
+	h, p, err := net.SplitHostPort(*hostPort)
+	if err != nil {
+		log.Fatalln("invalid host:port")
+	}
+
+	if h == "" {
+		h = "0.0.0.0"
+	}
+
+	c.ListenAddr = h
+	c.Port = p
 
 	return c
 }
@@ -113,6 +133,7 @@ func app(conf config) error {
 	// Echo instance
 	e := echo.New()
 	e.HideBanner = true
+	e.HidePort = true
 
 	// Middleware
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -145,7 +166,9 @@ func app(conf config) error {
 	e.Static("/files", conf.StoreDir)
 
 	// Start server
-	err = e.Start(":1323")
+	addr := net.JoinHostPort(conf.ListenAddr, conf.Port)
+	log.Printf("listening on http://%s\n", addr)
+	err = e.Start(addr)
 	e.Logger.Fatal(err)
 
 	return err
