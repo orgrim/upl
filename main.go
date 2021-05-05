@@ -112,6 +112,7 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 func app(conf config) error {
 	// Echo instance
 	e := echo.New()
+	e.HideBanner = true
 
 	// Middleware
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
