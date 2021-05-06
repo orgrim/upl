@@ -122,11 +122,12 @@ func selectTplFS(noEmbed bool) (fs.FS, error) {
 }
 
 type Template struct {
-	templates *template.Template
+	fs     fs.FS
+	layout string
 }
 
 func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	return t.templates.ExecuteTemplate(w, name, data)
+	return template.Must(template.ParseFS(t.fs, t.layout, name)).Execute(w, data)
 }
 
 func app(conf config) error {
@@ -148,7 +149,8 @@ func app(conf config) error {
 	}
 
 	t := &Template{
-		templates: template.Must(template.ParseFS(tplfs, "*.html")),
+		fs:     tplfs,
+		layout: "layout.html",
 	}
 
 	e.Renderer = t
