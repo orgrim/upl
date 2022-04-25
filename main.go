@@ -61,7 +61,7 @@ func newConfig() config {
 	return config{
 		NoEmbed:    false,
 		StoreDir:   "files",
-		ListenAddr: "localhost",
+		ListenAddr: "0.0.0.0",
 		Port:       "1323",
 	}
 }
