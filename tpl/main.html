@@ -1,20 +1,6 @@
 {{define "content"}}
 <section class="section">
   <div class="content">
-    <h2 class="title" id="current-files">Current Files</h2>
-    {{with .Files}}
-
-    <ul>
-      {{range .}}
-      <li><a href="/files/{{.}}">{{.}}</a></li>
-      {{end}}
-    </ul>
-    {{end}}
-  </div>
-</section>
-
-<section class="section">
-  <div class="content">
     <h2 class="title">Upload</h2>
     <form method="post" action="/" enctype="multipart/form-data">
       <div class="field">
@@ -42,4 +28,19 @@
     </form>
   </div>
 </section>
+
+<section class="section">
+  <div class="content">
+    <h2 class="title" id="current-files">Current Files</h2>
+    {{with .Files}}
+
+    <ul>
+      {{range .}}
+      <li><a href="/files/{{.}}">{{.}}</a></li>
+      {{end}}
+    </ul>
+    {{end}}
+  </div>
+</section>
+
 {{end}}
